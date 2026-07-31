@@ -1,2 +1,1 @@
-# polymarket-senate-dashboard
-Applied database technology class project
+web: gunicorn app:app --bind 0.0.0.0:$PORT

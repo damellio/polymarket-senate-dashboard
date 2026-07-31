@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Trades{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Trades</h2>
+    <a href="{{ url_for('trade_new') }}" class="btn btn-primary">Add Trade</a>
+</div>
+
+<form class="row g-2 mb-3" method="get">
+    <div class="col-auto">
+        <label class="visually-hidden">Race</label>
+        <select name="race_id" class="form-select">
+            <option value="">All Races</option>
+            {% for race in races %}
+            <option value="{{ race.RaceID }}" {% if selected_race_id|string == race.RaceID|string %}selected{% endif %}>
+                {{ race.RaceName }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-auto">
+        <label class="visually-hidden">Buy/Sell</label>
+        <select name="buy_sell" class="form-select">
+            <option value="">Buy or Sell</option>
+            <option value="B" {% if selected_buy_sell == 'B' %}selected{% endif %}>Buy</option>
+            <option value="S" {% if selected_buy_sell == 'S' %}selected{% endif %}>Sell</option>
+        </select>
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-outline-secondary">Filter</button>
+        <a href="{{ url_for('trades') }}" class="btn btn-outline-secondary">Clear</a>
+    </div>
+</form>
+
+<p class="text-muted">Showing page {{ page }} of {{ total_pages }} ({{ total }} matching trades)</p>
+
+<table class="table table-sm table-striped table-hover">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Race</th>
+            <th>Time</th>
+            <th>Account</th>
+            <th>Buy/Sell</th>
+            <th>Party</th>
+            <th>Net Dir.</th>
+            <th>Amount</th>
+            <th>Shares</th>
+            <th>Price</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for trade in trades %}
+        <tr>
+            <td>{{ trade.TradeID }}</td>
+            <td>{{ trade.RaceName }}</td>
+            <td>{{ trade.StockTradeTime }}</td>
+            <td class="text-truncate" style="max-width: 140px;">{{ trade.AccountID }}</td>
+            <td>{{ trade.BuyOrSell | buysell_label }}</td>
+            <td>{{ trade.PartyBeingTraded | party_label }}</td>
+            <td>{{ trade.NetDirection | party_label }}</td>
+            <td>${{ trade.Amount }}</td>
+            <td>{{ trade.Shares }}</td>
+            <td>{{ trade.Price }}</td>
+            <td class="text-nowrap">
+                <a href="{{ url_for('trade_edit', trade_id=trade.TradeID) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+                <form action="{{ url_for('trade_delete', trade_id=trade.TradeID) }}" method="post" class="d-inline"
+                      onsubmit="return confirm('Delete this trade?');">
+                    <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<nav>
+    <ul class="pagination">
+        <li class="page-item {% if page <= 1 %}disabled{% endif %}">
+            <a class="page-link" href="?race_id={{ selected_race_id }}&buy_sell={{ selected_buy_sell }}&page={{ page - 1 }}">Previous</a>
+        </li>
+        <li class="page-item disabled"><span class="page-link">Page {{ page }} of {{ total_pages }}</span></li>
+        <li class="page-item {% if page >= total_pages %}disabled{% endif %}">
+            <a class="page-link" href="?race_id={{ selected_race_id }}&buy_sell={{ selected_buy_sell }}&page={{ page + 1 }}">Next</a>
+        </li>
+    </ul>
+</nav>
+{% endblock %}

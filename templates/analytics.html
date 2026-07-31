@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Analytics{% endblock %}
+{% block content %}
+<h2 class="mb-4">Analytics</h2>
+
+<h4>Net Direction by Race</h4>
+<p class="text-muted">Democrat-leaning vs. Republican-leaning trade counts per race, pulled live from the database.</p>
+<canvas id="directionChart" height="100"></canvas>
+
+<table class="table table-sm table-bordered mt-3">
+    <thead>
+        <tr><th>Race</th><th>Democrat-leaning trades</th><th>Republican-leaning trades</th><th>% Democrat</th></tr>
+    </thead>
+    <tbody>
+        {% for row in direction_rows %}
+        <tr>
+            <td>{{ row.RaceName }}</td>
+            <td>{{ row.DemTrades }}</td>
+            <td>{{ row.RepTrades }}</td>
+            <td>{{ "%.2f"|format(100 * row.DemTrades / (row.DemTrades + row.RepTrades)) }}%</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h4 class="mt-5">Buy vs Sell Volume by Race</h4>
+<p class="text-muted">Total dollar amount traded on the Buy side vs. the Sell side, per race.</p>
+<canvas id="volumeChart" height="100"></canvas>
+
+<table class="table table-sm table-bordered mt-3">
+    <thead>
+        <tr><th>Race</th><th>Buy Volume ($)</th><th>Sell Volume ($)</th></tr>
+    </thead>
+    <tbody>
+        {% for row in volume_rows %}
+        <tr>
+            <td>{{ row.RaceName }}</td>
+            <td>{{ "%.2f"|format(row.BuyVolume) }}</td>
+            <td>{{ "%.2f"|format(row.SellVolume) }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script>
+    const labels = {{ chart_labels | tojson }};
+
+    new Chart(document.getElementById('directionChart'), {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                { label: 'Democrat-leaning', data: {{ dem_counts | tojson }}, backgroundColor: '#0d6efd' },
+                { label: 'Republican-leaning', data: {{ rep_counts | tojson }}, backgroundColor: '#dc3545' }
+            ]
+        },
+        options: { responsive: true, scales: { y: { beginAtZero: true } } }
+    });
+
+    new Chart(document.getElementById('volumeChart'), {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                { label: 'Buy Volume ($)', data: {{ buy_volume | tojson }}, backgroundColor: '#198754' },
+                { label: 'Sell Volume ($)', data: {{ sell_volume | tojson }}, backgroundColor: '#ffc107' }
+            ]
+        },
+        options: { responsive: true, scales: { y: { beginAtZero: true } } }
+    });
+</script>
+{% endblock %}

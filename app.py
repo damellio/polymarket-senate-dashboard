@@ -171,6 +171,58 @@ def race_detail(race_id):
 
 PAGE_SIZE = 50
 
+@app.route('/trades')
+def trades():
+    race_id = request.args.get('race_id', default='', type=str)
+    buy_sell = request.args.get('buy_sell', default='', type=str)
+    page = request.args.get('page', default=1, type=int)
+    if page < 1:
+        page = 1
+
+    where_clauses = []
+    params = []
+    if race_id:
+        where_clauses.append("t.RaceID = %s")
+        params.append(race_id)
+    if buy_sell:
+        where_clauses.append("t.BuyOrSell = %s")
+        params.append(buy_sell)
+    where_sql = ("WHERE " + " AND ".join(where_clauses)) if where_clauses else ""
+
+    conn = None
+    try:
+        conn = get_db_connection()
+        with conn.cursor() as cursor:
+            race_list = get_all_races(cursor)
+
+            cursor.execute(f"SELECT COUNT(*) AS total FROM Trade t {where_sql}", params)
+            total = cursor.fetchone()['total']
+            total_pages = max(1, (total + PAGE_SIZE - 1) // PAGE_SIZE)
+            if page > total_pages:
+                page = total_pages
+            offset = (page - 1) * PAGE_SIZE
+
+            cursor.execute(f"""
+                SELECT t.TradeID, t.RaceID, CONCAT(r.State, ' ', r.Position) AS RaceName,
+                       t.StockTradeTime, t.AccountID, t.BuyOrSell, t.PartyBeingTraded,
+                       t.NetDirection, t.Amount, t.Shares, t.Price
+                FROM Trade t
+                JOIN Race r ON t.RaceID = r.RaceID
+                {where_sql}
+                ORDER BY t.StockTradeTime DESC
+                LIMIT %s OFFSET %s
+            """, params + [PAGE_SIZE, offset])
+            trade_list = cursor.fetchall()
+    finally:
+        if conn:
+            conn.close()
+
+    return render_template(
+        'trades.html', trades=trade_list, races=race_list,
+        selected_race_id=race_id, selected_buy_sell=buy_sell,
+        page=page, total_pages=total_pages, total=total,
+    )
+
 def _trade_form_errors(form):
     """Validate trade form fields."""
     errors = []

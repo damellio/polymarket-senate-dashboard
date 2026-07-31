@@ -1,102 +1,44 @@
 {% extends "base.html" %}
-{% block title %}{{ 'Add Trade' if mode == 'new' else 'Edit Trade #' ~ trade_id }}{% endblock %}
+
+{% block title %}
+{{ 'Add Trade' if mode == 'new' else 'Edit Trade #' ~ trade_id }}
+{% endblock %}
+
 {% block content %}
-<h2 class="mb-4">{{ 'Add Trade' if mode == 'new' else 'Edit Trade #' ~ trade_id }}</h2>
+
+<h2 class="mb-4">
+    {{ 'Add Trade' if mode == 'new' else 'Edit Trade #' ~ trade_id }}
+</h2>
+
 
 {% if errors %}
 <div class="alert alert-danger">
+
     <ul class="mb-0">
-        {% for error in errors %}<li>{{ error }}</li>{% endfor %}
+        {% for error in errors %}
+        <li>{{ error }}</li>
+        {% endfor %}
     </ul>
+
 </div>
 {% endif %}
 
+
 <form method="post" class="col-md-6">
+
+    <!-- Select which race this trade belongs to -->
     <div class="mb-3">
         <label class="form-label">Race</label>
+
         <select name="race_id" class="form-select" required>
             <option value="">-- Select a race --</option>
+
             {% for race in races %}
-            <option value="{{ race.RaceID }}" {% if trade.RaceID|string == race.RaceID|string %}selected{% endif %}>
+            <option value="{{ race.RaceID }}"
+                {% if trade.RaceID|string == race.RaceID|string %}selected{% endif %}>
                 {{ race.RaceName }}
             </option>
             {% endfor %}
+
         </select>
     </div>
-
-    <div class="mb-3">
-        <label class="form-label">Trade Time</label>
-        <input type="datetime-local" name="trade_time" class="form-control"
-               value="{{ trade.StockTradeTime.strftime('%Y-%m-%dT%H:%M') if trade.StockTradeTime else trade.trade_time or '' }}" required>
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label">Account ID</label>
-        <input type="text" name="account_id" class="form-control" maxlength="45"
-               value="{{ trade.AccountID or trade.account_id or '' }}" required>
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label">Buy or Sell</label>
-        <select name="buy_sell" class="form-select" required>
-            <option value="B" {% if (trade.BuyOrSell or trade.buy_sell) == 'B' %}selected{% endif %}>Buy</option>
-            <option value="S" {% if (trade.BuyOrSell or trade.buy_sell) == 'S' %}selected{% endif %}>Sell</option>
-        </select>
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label">Party Being Traded</label>
-        <select name="party_traded" class="form-select" required>
-            <option value="D" {% if (trade.PartyBeingTraded or trade.party_traded) == 'D' %}selected{% endif %}>Democrat</option>
-            <option value="R" {% if (trade.PartyBeingTraded or trade.party_traded) == 'R' %}selected{% endif %}>Republican</option>
-        </select>
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label">Net Direction</label>
-        <select name="net_direction" class="form-select" required>
-            <option value="D" {% if (trade.NetDirection or trade.net_direction) == 'D' %}selected{% endif %}>Democrat</option>
-            <option value="R" {% if (trade.NetDirection or trade.net_direction) == 'R' %}selected{% endif %}>Republican</option>
-        </select>
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label">Shares</label>
-        <input type="number" name="shares" id="shares" class="form-control" min="1" step="1"
-               value="{{ trade.Shares or trade.shares or '' }}" required>
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label">Price (per share)</label>
-        <input type="number" name="price" id="price" class="form-control" min="0.00001" step="0.00001"
-               value="{{ trade.Price or trade.price or '' }}" required>
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label">Amount</label>
-        <input type="number" name="amount" id="amount" class="form-control" min="0.001" step="0.001"
-               value="{{ trade.Amount or trade.amount or '' }}" required>
-        <div class="form-text">Auto-fills as Shares &times; Price -- feel free to override.</div>
-    </div>
-
-    <button type="submit" class="btn btn-primary">Save</button>
-    <a href="{{ url_for('trades') }}" class="btn btn-outline-secondary">Cancel</a>
-</form>
-{% endblock %}
-
-{% block scripts %}
-<script>
-    const shares = document.getElementById('shares');
-    const price = document.getElementById('price');
-    const amount = document.getElementById('amount');
-    function recalcAmount() {
-        const s = parseFloat(shares.value);
-        const p = parseFloat(price.value);
-        if (!isNaN(s) && !isNaN(p)) {
-            amount.value = (s * p).toFixed(3);
-        }
-    }
-    shares.addEventListener('input', recalcAmount);
-    price.addEventListener('input', recalcAmount);
-</script>
-{% endblock %}

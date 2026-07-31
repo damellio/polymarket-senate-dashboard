@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}{{ race.RaceName }}{% endblock %}
+{% block content %}
+<h2>{{ race.RaceName }}</h2>
+<p class="text-muted">{{ race.Position }}</p>
+
+{% if outcome %}
+<div class="alert alert-info">
+    <strong>Certified Result:</strong> {{ outcome.NameOfCandidateWhoWon }}
+    ({{ outcome.PartyOfCandidateWhoWon | party_label }})
+    won by {{ outcome.MarginOfVictory }} points.
+</div>
+{% endif %}
+
+<h4 class="mt-4">Trades</h4>
+<table class="table table-sm table-bordered">
+    <thead>
+        <tr>
+            <th>Timestamp</th>
+            <th>Account</th>
+            <th>Buy/Sell</th>
+            <th>Party</th>
+            <th>Amount</th>
+            <th>Shares</th>
+            <th>Price</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for trade in trades %}
+        <tr>
+            <td>{{ trade.StockTradeTime }}</td>
+            <td>{{ trade.AccountID }}</td>
+            <td>{{ trade.BuyOrSell | buysell_label }}</td>
+            <td>{{ trade.PartyBeingTraded | party_label }}</td>
+            <td>${{ trade.Amount }}</td>
+            <td>{{ trade.Shares }}</td>
+            <td>{{ trade.Price }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

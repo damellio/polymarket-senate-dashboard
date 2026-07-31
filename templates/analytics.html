@@ -62,11 +62,11 @@ Analytics
 
     <tbody>
         {% for race in volume_rows %}
-        <tr>
-            <td>{{ race.RaceName }}</td>            <td>{{ row.RaceName }}</td>
-            <td>{{ "%.2f"|format(row.BuyVolume) }}</td>
-            <td>{{ "%.2f"|format(row.SellVolume) }}</td>
-        </tr>
+            <tr>
+                <td>{{ race.RaceName }}</td>
+                <td>{{ "%.2f"|format(race.BuyVolume) }}</td>
+                <td>{{ "%.2f"|format(race.SellVolume) }}</td>
+            </tr>
         {% endfor %}
     </tbody>
 </table>

@@ -1,40 +1,69 @@
 {% extends "base.html" %}
-{% block title %}Analytics{% endblock %}
-{% block content %}
-<h2 class="mb-4">Analytics</h2>
 
-<h4>Net Direction by Race</h4>
-<p class="text-muted">Democrat-leaning vs. Republican-leaning trade counts per race, pulled live from the database.</p>
+{% block title %}
+Analytics
+{% endblock %}
+
+{% block content %}
+
+<h2 class="mb-4">Analytics Dashboard</h2>
+
+<!-- Chart showing overall trade direction -->
+<h4>Trade Direction by Race</h4>
+<p class="text-muted">
+    Number of Democrat-leaning and Republican-leaning trades for each race.
+</p>
+
 <canvas id="directionChart" height="100"></canvas>
 
 <table class="table table-sm table-bordered mt-3">
     <thead>
-        <tr><th>Race</th><th>Democrat-leaning trades</th><th>Republican-leaning trades</th><th>% Democrat</th></tr>
-    </thead>
-    <tbody>
-        {% for row in direction_rows %}
         <tr>
-            <td>{{ row.RaceName }}</td>
-            <td>{{ row.DemTrades }}</td>
-            <td>{{ row.RepTrades }}</td>
-            <td>{{ "%.2f"|format(100 * row.DemTrades / (row.DemTrades + row.RepTrades)) }}%</td>
+            <th>Race</th>
+            <th>Democrat Trades</th>
+            <th>Republican Trades</th>
+            <th>Democrat %</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for race in direction_rows %}
+        {% set totalTrades = race.DemTrades + race.RepTrades %}
+        <tr>
+            <td>{{ race.RaceName }}</td>
+            <td>{{ race.DemTrades }}</td>
+            <td>{{ race.RepTrades }}</td>
+            <td>
+                {{ "%.2f"|format((race.DemTrades / totalTrades) * 100) }}%
+            </td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
 
-<h4 class="mt-5">Buy vs Sell Volume by Race</h4>
-<p class="text-muted">Total dollar amount traded on the Buy side vs. the Sell side, per race.</p>
+<hr class="my-5">
+
+<!-- Buy vs. Sell dollar volume -->
+<h4>Buy and Sell Volume</h4>
+<p class="text-muted">
+    Total dollar amount traded on each side of the market.
+</p>
+
 <canvas id="volumeChart" height="100"></canvas>
 
 <table class="table table-sm table-bordered mt-3">
     <thead>
-        <tr><th>Race</th><th>Buy Volume ($)</th><th>Sell Volume ($)</th></tr>
-    </thead>
-    <tbody>
-        {% for row in volume_rows %}
         <tr>
-            <td>{{ row.RaceName }}</td>
+            <th>Race</th>
+            <th>Buy Volume ($)</th>
+            <th>Sell Volume ($)</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for race in volume_rows %}
+        <tr>
+            <td>{{ race.RaceName }}</td>            <td>{{ row.RaceName }}</td>
             <td>{{ "%.2f"|format(row.BuyVolume) }}</td>
             <td>{{ "%.2f"|format(row.SellVolume) }}</td>
         </tr>
